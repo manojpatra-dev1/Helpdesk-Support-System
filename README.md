@@ -33,8 +33,8 @@ helpdesk_backend/
 
 ```bash
 python -m venv venv
-venv\Scripts\activate          # Windows
-# source venv/bin/activate     # Mac/Linux
+venv\Scripts\activate          
+
 
 pip install -r requirements.txt
 
