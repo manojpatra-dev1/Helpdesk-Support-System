@@ -26,7 +26,7 @@ class TicketDetailView(generics.RetrieveUpdateDestroyAPIView):
         ticket = self.get_object()
         if ticket.status == Ticket.Status.CLOSED:
             return Response(
-                {"detail": "Closed ticket ko edit nahi kar sakte."},
+                {"detail": "Closed ticket can't be edit."},
                 status=status.HTTP_400_BAD_REQUEST
             )
         return super().update(request, *args, **kwargs)

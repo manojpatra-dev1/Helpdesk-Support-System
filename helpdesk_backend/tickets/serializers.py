@@ -20,7 +20,7 @@ class CommentSerializer(serializers.ModelSerializer):
         ticket = data.get('ticket')
         if ticket and ticket.status == Ticket.Status.CLOSED:
             raise serializers.ValidationError(
-                "Closed ticket pe comment add nahi kar sakte."
+                "in the Closed ticket can't be added comment"
             )
         return data
 
@@ -62,20 +62,20 @@ class TicketStatusUpdateSerializer(serializers.ModelSerializer):
         # Rule: Closed ticket ko change hi nahi kar sakte
         if current_status == Ticket.Status.CLOSED:
             raise serializers.ValidationError(
-                "Closed ticket ka status change nahi kar sakte."
+                "Closed ticket can't be edit"
             )
 
         # Rule: Same status dobara set karna allow nahi
         if new_status == current_status:
             raise serializers.ValidationError(
-                f"Ticket already '{current_status}' status me hai."
+                f"Ticket already '{current_status}'  in side the status ."
             )
 
         # Rule: Sequence follow karna zaroori hai (skip allowed nahi)
         allowed_next = self.VALID_TRANSITIONS[current_status]
         if new_status not in allowed_next:
             raise serializers.ValidationError(
-                f"'{current_status}' se seedha '{new_status}' nahi jaa sakte. "
+                f"'{current_status}' can't be  '{new_status}' go directly "
                 f"Allowed next status: {allowed_next}"
             )
 

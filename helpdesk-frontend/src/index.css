@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Space Grotesk", ui-sans-serif, sans-serif;
+  --font-body: "Inter", ui-sans-serif, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --color-ink: #12181f;
+  --color-ink-soft: #4a5563;
+  --color-line: #e4e7eb;
+  --color-canvas: #ffffff;
+  --color-well: #f6f7f9;
+
+  --color-brand: #1f5f5b;
+  --color-brand-soft: #e8f1f0;
+
+  --color-open: #2563eb;
+  --color-open-soft: #eaf1ff;
+  --color-progress: #b45309;
+  --color-progress-soft: #fef3e2;
+  --color-resolved: #15803d;
+  --color-resolved-soft: #e9f8ee;
+  --color-closed: #4b5563;
+  --color-closed-soft: #eef0f2;
+
+  --color-low: #4b5563;
+  --color-low-soft: #eef0f2;
+  --color-medium: #b45309;
+  --color-medium-soft: #fef3e2;
+  --color-high: #b91c1c;
+  --color-high-soft: #fdecec;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
