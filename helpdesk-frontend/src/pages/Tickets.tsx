@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Plus, Search, Pencil, Trash2, ArrowRightCircle } from 'lucide-react'
 import { useTicketStore } from '../store/ticketStore'
+import { useAuthStore } from '../store/authStore'
 import StatusBadge from '../components/StatusBadge'
 import PriorityBadge from '../components/PriorityBadge'
 import EmptyState from '../components/EmptyState'
@@ -13,6 +14,8 @@ import type { Ticket } from '../types'
 export default function Tickets() {
   const { items, listStatus, listError, filters, setFilters, fetchTickets, deleteTicket, changeStatus } =
     useTicketStore()
+  const role = useAuthStore((s) => s.role)
+  const isAdmin = role === 'admin'
   const [showCreate, setShowCreate] = useState(false)
   const [editing, setEditing] = useState<Ticket | null>(null)
   const [deleting, setDeleting] = useState<Ticket | null>(null)
@@ -163,18 +166,20 @@ export default function Tickets() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
-                        <button
-                          onClick={() => handleAdvance(t)}
-                          disabled={locked || advancingId === t.id}
-                          title={
-                            locked
-                              ? 'Closed tickets cannot change status'
-                              : `Move to ${STATUS_LABELS[nextStatus(t.status)!]}`
-                          }
-                          className="p-1.5 rounded-md text-[var(--color-ink-soft)] hover:text-[var(--color-brand)] hover:bg-white disabled:opacity-40 disabled:hover:bg-transparent"
-                        >
-                          <ArrowRightCircle size={15} />
-                        </button>
+                        {isAdmin && (
+                          <button
+                            onClick={() => handleAdvance(t)}
+                            disabled={locked || advancingId === t.id}
+                            title={
+                              locked
+                                ? 'Closed tickets cannot change status'
+                                : `Move to ${STATUS_LABELS[nextStatus(t.status)!]}`
+                            }
+                            className="p-1.5 rounded-md text-[var(--color-ink-soft)] hover:text-[var(--color-brand)] hover:bg-white disabled:opacity-40 disabled:hover:bg-transparent"
+                          >
+                            <ArrowRightCircle size={15} />
+                          </button>
+                        )}
                         <button
                           onClick={() => setEditing(t)}
                           disabled={locked}

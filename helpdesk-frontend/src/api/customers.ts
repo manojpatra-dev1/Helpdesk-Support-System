@@ -12,7 +12,7 @@ export const customersApi = {
     client.post('customers/', payload).then((r) => r.data),
 
   update: (id: number | string, payload: CustomerInput): Promise<Customer> =>
-    client.patch(`customers/${id}/`, payload).then((r) => r.data),
+    client.put(`customers/${id}/`, payload).then((r) => r.data),
 
   remove: (id: number | string): Promise<void> =>
     client.delete(`customers/${id}/`).then(() => undefined),

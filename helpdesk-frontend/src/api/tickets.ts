@@ -19,7 +19,7 @@ export const ticketsApi = {
     client.post('tickets/', payload).then((r) => r.data),
 
   update: (id: number | string, payload: TicketEditInput): Promise<Ticket> =>
-    client.patch(`tickets/${id}/`, payload).then((r) => r.data),
+    client.put(`tickets/${id}/`, payload).then((r) => r.data),
 
   remove: (id: number | string): Promise<void> =>
     client.delete(`tickets/${id}/`).then(() => undefined),

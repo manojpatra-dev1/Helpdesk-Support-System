@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { Customer, Priority, Ticket } from '../types'
 import { useTicketStore } from '../store/ticketStore'
+import { useAuthStore } from '../store/authStore'
 import { customersApi } from '../api/customers'
 import Modal from './Modal'
 import FormField, { inputClass } from './FormField'
@@ -29,7 +30,11 @@ export default function TicketFormModal({
 }: TicketFormModalProps) {
   const createTicket = useTicketStore((s) => s.createTicket)
   const updateTicket = useTicketStore((s) => s.updateTicket)
+  const role = useAuthStore((s) => s.role)
   const isEdit = Boolean(ticket)
+  // Only an admin picks which customer a ticket belongs to. A customer's own
+  // tickets are auto-assigned by the API, so they never see or send this field.
+  const showCustomerPicker = !isEdit && !presetCustomerId && role === 'admin'
 
   const [customers, setCustomers] = useState<Customer[]>([])
   const [form, setForm] = useState<FormState>({
@@ -43,10 +48,10 @@ export default function TicketFormModal({
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    if (!isEdit && !presetCustomerId) {
+    if (showCustomerPicker) {
       customersApi.list().then(setCustomers).catch(() => {})
     }
-  }, [isEdit, presetCustomerId])
+  }, [showCustomerPicker])
 
   const handleChange =
     (field: keyof FormState) =>
@@ -66,7 +71,7 @@ export default function TicketFormModal({
           priority: form.priority,
         })
       : await createTicket({
-          customer: Number(form.customer),
+          ...(role === 'admin' ? { customer: Number(form.customer) } : {}),
           subject: form.subject,
           description: form.description,
           category: form.category,
@@ -85,7 +90,7 @@ export default function TicketFormModal({
   return (
     <Modal title={isEdit ? 'Edit ticket' : 'New ticket'} onClose={onClose} width="max-w-lg">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        {!isEdit && !presetCustomerId && (
+        {showCustomerPicker && (
           <FormField label="Customer" error={errors.customer}>
             <select className={inputClass} value={form.customer} onChange={handleChange('customer')} required>
               <option value="" disabled>

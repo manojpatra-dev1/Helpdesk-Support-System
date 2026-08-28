@@ -1,13 +1,31 @@
-import { NavLink } from 'react-router-dom'
-import { LayoutGrid, Ticket, Users } from 'lucide-react'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { LayoutGrid, Ticket, Users, User, LogOut } from 'lucide-react'
+import { useAuthStore } from '../store/authStore'
 
-const links = [
+const adminLinks = [
   { to: '/', label: 'Dashboard', icon: LayoutGrid, end: true },
   { to: '/tickets', label: 'Tickets', icon: Ticket, end: false },
   { to: '/customers', label: 'Customers', icon: Users, end: false },
 ]
 
+const customerLinks = [
+  { to: '/tickets', label: 'My Tickets', icon: Ticket, end: false },
+  { to: '/profile', label: 'My Profile', icon: User, end: false },
+]
+
 export default function Sidebar() {
+  const role = useAuthStore((s) => s.role)
+  const username = useAuthStore((s) => s.username)
+  const logout = useAuthStore((s) => s.logout)
+  const navigate = useNavigate()
+
+  const links = role === 'admin' ? adminLinks : customerLinks
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login', { replace: true })
+  }
+
   return (
     <aside className="w-56 shrink-0 border-r border-[var(--color-line)] flex flex-col py-6 px-4">
       <div className="flex items-center gap-2 px-2 mb-8">
@@ -37,8 +55,19 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
-      <div className="mt-auto px-3 pt-6 text-[11px] text-[var(--color-ink-soft)] font-mono">
-        agent console
+      <div className="mt-auto flex flex-col gap-1 px-1 pt-6">
+        {username && (
+          <div className="px-2 pb-2">
+            <p className="text-xs font-medium text-[var(--color-ink)] truncate">{username}</p>
+            <p className="text-[11px] text-[var(--color-ink-soft)] capitalize">{role}</p>
+          </div>
+        )}
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-[var(--color-ink-soft)] hover:bg-[var(--color-well)] hover:text-[var(--color-ink)]"
+        >
+          <LogOut size={16} /> Log out
+        </button>
       </div>
     </aside>
   )

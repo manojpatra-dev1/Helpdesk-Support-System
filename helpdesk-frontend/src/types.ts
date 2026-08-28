@@ -38,7 +38,7 @@ export interface Ticket {
 }
 
 export interface TicketCreateInput {
-  customer: number
+  customer?: number // admin must include this; omitted for the customer role (auto-assigned by the API)
   subject: string
   description: string
   category: string
@@ -77,4 +77,33 @@ export interface TicketFilters {
 export interface ApiErrorResult {
   fieldErrors: Record<string, string>
   message: string
+}
+
+// --- Auth ---
+
+export type Role = 'admin' | 'customer'
+
+export interface LoginPayload {
+  email: string
+  password: string
+}
+
+export interface LoginResponse {
+  access: string
+  refresh: string
+  role: Role
+  customer_id: number | null
+  username: string
+}
+
+export interface RegisterPayload {
+  name: string
+  email: string
+  password: string
+  confirm_password: string
+}
+
+export interface RegisterResponse {
+  detail: string
+  customer: Customer
 }

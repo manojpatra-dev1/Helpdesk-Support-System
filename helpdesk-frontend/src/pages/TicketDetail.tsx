@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { ArrowLeft, Pencil, Trash2 } from 'lucide-react'
 import { useTicketStore } from '../store/ticketStore'
+import { useAuthStore } from '../store/authStore'
 import StatusPipeline from '../components/StatusPipeline'
 import PriorityBadge from '../components/PriorityBadge'
 import CommentSection from '../components/CommentSection'
@@ -26,6 +27,7 @@ export default function TicketDetail() {
     clearActionError,
     deleteTicket,
   } = useTicketStore()
+  const isAdmin = useAuthStore((s) => s.role === 'admin')
 
   const [editing, setEditing] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -120,7 +122,7 @@ export default function TicketDetail() {
               Next step: <span className="font-medium text-[var(--color-ink)]">{STATUS_LABELS[upcoming!]}</span>
             </p>
           )}
-          {!locked && (
+          {!locked && isAdmin && (
             <button
               onClick={handleAdvance}
               className="px-3.5 py-1.5 rounded-lg text-sm font-medium bg-[var(--color-brand)] text-white hover:opacity-90"
