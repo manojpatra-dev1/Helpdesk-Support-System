@@ -1,7 +1,9 @@
 # Helpdesk Support System
 
-A simple helpdesk ticketing system built as a one-day challenge. A support agent
-can manage customers and their support tickets — no login/authentication required.
+A helpdesk ticketing system built as a one-day challenge. Supports two roles —
+**admin** (support agent) and **customer** — with JWT-based authentication.
+Admins manage all customers and tickets; customers can register, log in, and
+raise/track their own tickets.
 
 The project has two parts:
 - `helpdesk_backend/` — Django REST Framework API
@@ -14,6 +16,7 @@ The project has two parts:
 **Backend**
 - Python, Django
 - Django REST Framework (DRF) — generic class-based views
+- djangorestframework-simplejwt — JWT authentication
 - django-filter — filtering/search
 - django-cors-headers — CORS for frontend integration
 - SQLite (default local database)
@@ -22,30 +25,37 @@ The project has two parts:
 - React + Vite
 - TypeScript
 - Tailwind CSS
-- Zustand — state management
+- Zustand — state management (including auth store)
 - Axios — API calls
-- React Router
+- React Router — with protected/role-based routes
 - Lucide React — icons
 
 ---
 
 ## Project Structure
 
+
 ```
 HelpDesk_Support_System/
 ├── helpdesk_backend/
-│   ├── helpdesk_project/     # Project settings, urls, custom exception handler
-│   ├── customers/             # Customer model, serializer, views, urls
-│   ├── tickets/                # Ticket, TicketHistory, Comment models + serializers, views, urls, tests
-│   ├── manage.py
-│   ├── requirements.txt
-│   └── README.md
+│ ├── helpdesk_project/ # Project settings, urls, custom exception handler
+│ ├── accounts/ # User auth: register, login, JWT, role permissions
+│ ├── customers/ # Customer model, serializer, views, urls
+│ ├── tickets/ # Ticket, TicketHistory, Comment models + serializers, views, urls, tests
+│ ├── manage.py
+│ ├── requirements.txt
+│ └── README.md
 ├── helpdesk-frontend/
-│   ├── src/
-│   ├── public/
-│   └── package.json
+│ ├── src/
+│ │ ├── api/ # auth.ts, customers.ts, tickets.ts, client.ts
+│ │ ├── store/ # authStore.ts + other Zustand stores
+│ │ ├── components/ # ProtectedRoute.tsx, Sidebar.tsx, etc.
+│ │ └── pages/ # Login, Register, Profile, Dashboard, Tickets, Customers...
+│ ├── public/
+│ └── package.json
 └── .gitignore
 ```
+
 
 
 ---
@@ -81,9 +91,24 @@ Runs on Vite's default dev server (usually `http://localhost:5173`).
 
 ---
 
+## Authentication & Roles
+
+- Auth is JWT-based (`djangorestframework-simplejwt`) — `access` + `refresh` tokens
+  issued on login and stored client-side (Zustand `authStore`).
+- Two roles:
+  - **admin** (`is_staff=True`) — full access: all customers, all tickets, dashboard
+    stats, and can change ticket status.
+  - **customer** — created automatically at registration, linked 1:1 to a `Customer`
+    record; can only see/manage their own tickets.
+- Frontend routes are role-gated via `ProtectedRoute` — e.g. `/customers` and the
+  dashboard (`/`) are admin-only; a logged-in customer is redirected to `/tickets`.
+
+---
+
 ## Data Models
 
 **Customer**
+- `user` (OneToOne to Django `User`, nullable — only set for self-registered customers)
 - `name`, `email` (unique), `phone`
 - `created_at`, `updated_at`
 
@@ -114,27 +139,37 @@ Runs on Vite's default dev server (usually `http://localhost:5173`).
 5. Every status change is recorded in `TicketHistory`.
 6. Invalid input (missing fields, invalid customer, invalid status jump) returns a
    clear `400` error.
+7. Only an **admin** can change ticket status or view the customer list/dashboard;
+   a **customer** only sees their own tickets.
+8. Registration rejects an email that's already in use; password + confirm-password
+   must match.
 
 ---
 
 ## API Endpoints
 
+### Auth
+| Method | URL | Description |
+|---|---|---|
+| POST | `/api/auth/register/` | Register a new customer account (`name`, `email`, `password`, `confirm_password`) |
+| POST | `/api/auth/login/` | Log in (`email`, `password`) → returns `access`, `refresh`, `role`, `customer_id`, `username` |
+
 ### Customers
 | Method | URL | Description |
 |---|---|---|
-| GET / POST | `/api/customers/` | List / Create customer (supports `?search=`) |
+| GET / POST | `/api/customers/` | List / Create customer — admin only (supports `?search=`) |
 | GET / PUT / DELETE | `/api/customers/<id>/` | Retrieve / Update / Delete a customer |
 | GET | `/api/customers/<id>/tickets/` | List all tickets for this customer |
 
 ### Tickets
 | Method | URL | Description |
 |---|---|---|
-| GET / POST | `/api/tickets/` | List / Create ticket (filters: `?status=`, `?priority=`, `?category=`, search: `?search=`) |
+| GET / POST | `/api/tickets/` | List / Create ticket (filters: `?status=`, `?priority=`, `?category=`, search: `?search=`) — customers see only their own |
 | GET / PUT / DELETE | `/api/tickets/<id>/` | Retrieve / Update / Delete a ticket |
-| PATCH | `/api/tickets/<id>/change-status/` | Change ticket status (sequence enforced) |
+| PATCH | `/api/tickets/<id>/change-status/` | Change ticket status — admin only (sequence enforced) |
 | POST | `/api/tickets/<id>/add-comment/` | Add a comment to a ticket |
 | GET | `/api/tickets/<id>/history/` | View a ticket's status-change history |
-| GET | `/api/tickets/dashboard/` | Dashboard stats: total, open, in-progress, resolved, closed, high-priority |
+| GET | `/api/tickets/dashboard/` | Dashboard stats — admin only: total, open, in-progress, resolved, closed, high-priority |
 
 ---
 
