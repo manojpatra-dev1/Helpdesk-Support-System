@@ -1,40 +1,61 @@
-# Helpdesk Support System — Backend
+# Helpdesk Support System
 
-Django REST Framework backend for a simple helpdesk ticketing system, built as part of a
-one-day challenge. A support agent can manage customers and their support tickets —
-no login/authentication required.
+A simple helpdesk ticketing system built as a one-day challenge. A support agent
+can manage customers and their support tickets — no login/authentication required.
+
+The project has two parts:
+- `helpdesk_backend/` — Django REST Framework API
+- `helpdesk-frontend/` — React frontend (consumes the API)
 
 ---
 
 ## Tech Stack
 
+**Backend**
 - Python, Django
 - Django REST Framework (DRF) — generic class-based views
 - django-filter — filtering/search
 - django-cors-headers — CORS for frontend integration
 - SQLite (default local database)
 
+**Frontend**
+- React + Vite
+- TypeScript
+- Tailwind CSS
+- Zustand — state management
+- Axios — API calls
+- React Router
+- Lucide React — icons
+
 ---
 
 ## Project Structure
 
 ```
-helpdesk_backend/
-├── helpdesk_project/     # Project settings, urls, custom exception handler
-├── customers/             # Customer model, serializer, views, urls
-├── tickets/                # Ticket, TicketHistory, Comment models + serializers, views, urls, tests
-├── manage.py
-└── requirements.txt
+HelpDesk_Support_System/
+├── helpdesk_backend/
+│   ├── helpdesk_project/     # Project settings, urls, custom exception handler
+│   ├── customers/             # Customer model, serializer, views, urls
+│   ├── tickets/                # Ticket, TicketHistory, Comment models + serializers, views, urls, tests
+│   ├── manage.py
+│   ├── requirements.txt
+│   └── README.md
+├── helpdesk-frontend/
+│   ├── src/
+│   ├── public/
+│   └── package.json
+└── .gitignore
 ```
+
 
 ---
 
-## Setup
+## Backend Setup
 
 ```bash
+cd helpdesk_backend
 python -m venv venv
-venv\Scripts\activate          
-
+venv\Scripts\activate          # Windows
 
 pip install -r requirements.txt
 
@@ -45,6 +66,18 @@ python manage.py runserver
 
 Admin panel: `http://127.0.0.1:8000/admin/`
 API base URL: `http://127.0.0.1:8000/api/`
+
+---
+
+## Frontend Setup
+
+```bash
+cd helpdesk-frontend
+npm install
+npm run dev
+```
+
+Runs on Vite's default dev server (usually `http://localhost:5173`).
 
 ---
 
@@ -103,9 +136,6 @@ API base URL: `http://127.0.0.1:8000/api/`
 | GET | `/api/tickets/<id>/history/` | View a ticket's status-change history |
 | GET | `/api/tickets/dashboard/` | Dashboard stats: total, open, in-progress, resolved, closed, high-priority |
 
-Full request/response examples are in `helpdesk_api_handoff.md` (shared with the
-frontend developer).
-
 ---
 
 ## Error Response Format
@@ -126,7 +156,7 @@ All errors follow a consistent shape via a custom DRF exception handler:
 ## CORS
 
 `django-cors-headers` is enabled with `CORS_ALLOW_ALL_ORIGINS = True` for local
-development, so the frontend (React) can call this API directly without CORS errors.
+development, so the frontend can call the API directly without CORS errors.
 
 ---
 
@@ -137,9 +167,10 @@ needed) is handled on the frontend.
 
 ---
 
-## Running Tests
+## Running Backend Tests
 
 ```bash
+cd helpdesk_backend
 python manage.py test tickets
 ```
 
