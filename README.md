@@ -30,21 +30,22 @@ The project has two parts:
 ---
 
 ## Project Structure
-`
+
+```
 HelpDesk_Support_System/
 ├── helpdesk_backend/
-│ ├── helpdesk_project/ # Project settings, urls, custom exception handler
-│ ├── customers/ # Customer model, serializer, views, urls
-│ ├── tickets/ # Ticket, TicketHistory, Comment models + serializers, views, urls, tests
-│ ├── manage.py
-│ ├── requirements.txt
-│ └── README.md
+│   ├── helpdesk_project/     # Project settings, urls, custom exception handler
+│   ├── customers/             # Customer model, serializer, views, urls
+│   ├── tickets/                # Ticket, TicketHistory, Comment models + serializers, views, urls, tests
+│   ├── manage.py
+│   ├── requirements.txt
+│   └── README.md
 ├── helpdesk-frontend/
-│ ├── src/
-│ ├── public/
-│ └── package.json
+│   ├── src/
+│   ├── public/
+│   └── package.json
 └── .gitignore
-`
+```
 
 
 ---
