@@ -30,7 +30,7 @@ The project has two parts:
 ---
 
 ## Project Structure
-
+`
 HelpDesk_Support_System/
 ├── helpdesk_backend/
 │ ├── helpdesk_project/ # Project settings, urls, custom exception handler
@@ -44,7 +44,7 @@ HelpDesk_Support_System/
 │ ├── public/
 │ └── package.json
 └── .gitignore
-
+`
 
 
 ---
