@@ -1,14 +1,15 @@
 # Helpdesk Support System — Frontend
 
-A React + TypeScript UI for a support agent to manage customers and tickets,
-built against the Django REST API described in the project spec.
+A React + TypeScript UI with role-based access for an **admin** to manage
+customers and tickets, and a **customer** to register, log in, and track their
+own tickets — built against the Django REST API described in the project spec.
 
 ## Stack
 
 - React 19 + Vite + TypeScript
 - Tailwind CSS v4
-- Zustand (customer, ticket, dashboard stores)
-- React Router
+- Zustand (auth, customer, ticket, dashboard stores)
+- React Router — with role-based `ProtectedRoute`
 - Axios
 
 ## Setup
@@ -24,15 +25,30 @@ noted in the spec.
 
 ## Structure
 
+
 ```
 src/
-  types.ts       shared domain types (Customer, Ticket, Status, Priority, ...)
-  api/           axios client + one typed file per resource (customers, tickets)
-  store/         Zustand stores — each owns its slice of state + async actions
-  components/    shared UI: badges, modals, forms, the status pipeline, ConfirmDialog
-  pages/         Dashboard, Tickets, TicketDetail, Customers, CustomerDetail
-  constants.ts   status/priority enums, the forward-only sequence, formatters
+types.ts shared domain types (Customer, Ticket, Status, Priority, ...)
+api/ axios client + one typed file per resource (auth, customers, tickets)
+store/ Zustand stores — authStore (tokens, role, user) + resource stores
+components/ shared UI: ProtectedRoute, Sidebar, badges, modals, forms, status pipeline, ConfirmDialog
+pages/ Login, Register, Profile, Dashboard, Tickets, TicketDetail, Customers, CustomerDetail
+constants.ts status/priority enums, the forward-only sequence, formatters
+
 ```
+
+
+## Authentication & Roles
+
+- `authStore` holds `access`/`refresh` tokens, `role`, and `customer_id` after
+  login, persisted so a page refresh doesn't log the user out.
+- `Login` and `Register` pages call `src/api/auth.ts`; a successful login routes
+  the user in based on role.
+- `ProtectedRoute` wraps routes that need a logged-in user, and optionally a
+  specific role (e.g. `roles={['admin']}`) — an unauthenticated user is sent to
+  `/login`, and a customer hitting an admin-only route (like `/customers`) is
+  redirected to `/tickets`.
+- `Profile` page shows the logged-in user's own details.
 
 ## Notable behavior
 
