@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     #  apps
     'customers',
     'tickets',
+    'accounts'
 ]
 
 REST_FRAMEWORK = {
@@ -150,3 +151,24 @@ MAILERS = {
 # }
 
 CORS_ALLOW_ALL_ORIGINS = True  
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'EXCEPTION_HANDLER': 'helpdesk_project.exceptions.custom_exception_handler',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': False,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}

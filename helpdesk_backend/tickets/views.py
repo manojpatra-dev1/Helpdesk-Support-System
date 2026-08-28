@@ -1,8 +1,9 @@
-from rest_framework import generics, filters, status
+from rest_framework import generics, filters, status, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-
+from django.shortcuts import get_object_or_404
+from accounts.permissions import IsAdminRole
 from .models import Ticket, TicketHistory, Comment
 from .serializers import (
     TicketSerializer, TicketStatusUpdateSerializer,
@@ -11,16 +12,36 @@ from .serializers import (
 
 
 class TicketListCreateView(generics.ListCreateAPIView):
-    queryset = Ticket.objects.all()
     serializer_class = TicketSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['status', 'priority', 'category']
     search_fields = ['subject', 'description']
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:
+            return Ticket.objects.all()
+        return Ticket.objects.filter(customer__user=user)
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if user.is_staff:
+            if not serializer.validated_data.get('customer'):
+                from rest_framework.exceptions import ValidationError
+                raise ValidationError({"customer": "Admin have to give the customer id ."})
+            serializer.save()
+        else:
+            serializer.save(customer=user.customer_profile)
+
 
 class TicketDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Ticket.objects.all()
     serializer_class = TicketSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:
+            return Ticket.objects.all()
+        return Ticket.objects.filter(customer__user=user)
 
     def update(self, request, *args, **kwargs):
         ticket = self.get_object()
@@ -35,6 +56,7 @@ class TicketDetailView(generics.RetrieveUpdateDestroyAPIView):
 class TicketChangeStatusView(generics.UpdateAPIView):
     queryset = Ticket.objects.all()
     serializer_class = TicketStatusUpdateSerializer
+    permission_classes = [IsAdminRole]  # sirf admin status change kar sake
 
     def patch(self, request, *args, **kwargs):
         ticket = self.get_object()
@@ -54,6 +76,13 @@ class CommentCreateView(generics.CreateAPIView):
     serializer_class = CommentSerializer
 
     def create(self, request, *args, **kwargs):
+        ticket = get_object_or_404(Ticket, pk=self.kwargs['pk'])
+        user = request.user
+        if not user.is_staff and ticket.customer.user_id != user.id:
+            return Response(
+                {"detail": "you can comment only on your ticket."},
+                status=status.HTTP_403_FORBIDDEN
+            )
         data = request.data.copy()
         data['ticket'] = self.kwargs['pk']
         serializer = self.get_serializer(data=data)
@@ -70,6 +99,8 @@ class TicketHistoryListView(generics.ListAPIView):
 
 
 class DashboardStatsView(APIView):
+    permission_classes = [IsAdminRole]  # sirf admin dashboard dekh sake
+
     def get(self, request):
         qs = Ticket.objects.all()
         data = {
